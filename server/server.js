@@ -19,6 +19,7 @@ const app = express();
 
 // Middleware to ensure DB is connected before processing requests
 app.use(async (req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
     try {
         await connectDB();
         next();
@@ -26,10 +27,20 @@ app.use(async (req, res, next) => {
         console.error("DB Middleware Error:", error.message);
         res.status(500).json({ 
             success: false, 
-            message: "Database connection failed. Check IP whitelisting in MongoDB Atlas.",
+            message: "Database connection failed.",
             error: error.message 
         });
     }
+});
+
+app.get("/api/debug", (req, res) => {
+    res.json({
+        success: true,
+        message: "Debug route is working",
+        dbState: mongoose.connection.readyState,
+        nodeVersion: process.version,
+        env: process.env.NODE_ENV
+    });
 });
 
 // 1. MUST BE FIRST: Handle CORS and OPTIONS preflight

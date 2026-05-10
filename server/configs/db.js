@@ -1,17 +1,20 @@
 import mongoose from "mongoose";
 
 const connectDB = async () => {
+    // Disable buffering so we don't get those 10s timeouts
+    mongoose.set('bufferCommands', false);
     mongoose.set('strictQuery', true);
 
     if (mongoose.connection.readyState === 1) {
-        console.log("Using existing database connection");
         return;
     }
 
     try {
-        console.log("Attempting to connect to MongoDB...");
-        await mongoose.connect(`mongodb+srv://shikhar_dwivedi:aWLAnznvdTgsww0y@cluster0.e5dlnhf.mongodb.net/hotel-booking`, {
-            serverSelectionTimeoutMS: 5000, // Fail fast if IP is blocked
+        console.log("Connecting to MongoDB...");
+        await mongoose.connect(`mongodb+srv://shikhar_dwivedi:aWLAnznvdTgsww0y@cluster0.e5dlnhf.mongodb.net`, {
+            dbName: 'hotel-booking',
+            serverSelectionTimeoutMS: 5000,
+            connectTimeoutMS: 10000,
         });
         console.log("Database Connected Successfully");
     } catch (error) {
