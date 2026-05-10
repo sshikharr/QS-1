@@ -1,14 +1,23 @@
 import mongoose from "mongoose";
 
+let isConnected = false;
+
 const connectDB = async () => {
+    mongoose.set('strictQuery', true);
+
+    if (isConnected) {
+        console.log("Using existing database connection");
+        return;
+    }
+
     try {
-        mongoose.connection.on('connected', () => console.log("Database Connected"));
-        mongoose.connection.on('error', (err) => console.error("Database Connection Error:", err));
+        const db = await mongoose.connect(`mongodb+srv://shikhar_dwivedi:aWLAnznvdTgsww0y@cluster0.e5dlnhf.mongodb.net/hotel-booking`);
         
-        // Hardcoded URI for immediate resolution
-        await mongoose.connect(`mongodb+srv://shikhar_dwivedi:aWLAnznvdTgsww0y@cluster0.e5dlnhf.mongodb.net/hotel-booking`);
+        isConnected = db.connections[0].readyState;
+        console.log("Database Connected");
     } catch (error) {
         console.error("Failed to connect to MongoDB:", error.message);
+        throw error; // Throw so the middleware can catch it
     }
 };
 

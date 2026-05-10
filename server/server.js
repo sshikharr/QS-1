@@ -12,26 +12,19 @@ import clerkWebhooks from "./controllers/clerkWebhooks.js";
 import connectCloudinary from "./configs/cloudinary.js";
 import { stripeWebhooks } from "./controllers/stripeWebhooks.js";
 
-// Initialize DB connection
-connectDB();
+// Initialize Cloudinary
 connectCloudinary();
 
 const app = express();
 
 // Middleware to ensure DB is connected before processing requests
 app.use(async (req, res, next) => {
-    if (mongoose.connection.readyState === 2) {
-        // If connecting, wait for it to finish
-        console.log("DB is connecting, waiting...");
-        await new Promise((resolve) => {
-            const timer = setTimeout(resolve, 5000); // 5s max wait
-            mongoose.connection.once('connected', () => {
-                clearTimeout(timer);
-                resolve();
-            });
-        });
+    try {
+        await connectDB();
+        next();
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Database connection failed" });
     }
-    next();
 });
 
 // 1. MUST BE FIRST: Handle CORS and OPTIONS preflight
