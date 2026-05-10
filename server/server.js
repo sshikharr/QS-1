@@ -17,14 +17,14 @@ connectCloudinary();
 
 const app = express();
 
-// Middleware to ensure DB is connected before processing requests
 app.use(async (req, res, next) => {
-    console.log(`Incoming request: ${req.method} ${req.url}`);
+    console.log(`>>> [${new Date().toISOString()}] REQUEST START: ${req.method} ${req.url}`);
     try {
         await connectDB();
+        console.log(`>>> [${new Date().toISOString()}] DB READY, PROCEEDING...`);
         next();
     } catch (error) {
-        console.error("DB Middleware Error:", error.message);
+        console.error(`>>> [${new Date().toISOString()}] DB FAILURE:`, error.message);
         res.status(500).json({ 
             success: false, 
             message: "Database connection failed.",
