@@ -20,9 +20,16 @@ const app = express();
 
 // Middleware to ensure DB is connected before processing requests
 app.use(async (req, res, next) => {
-    if (mongoose.connection.readyState !== 1) {
-        // If not connected, wait or try to reconnect
-        console.log("DB not ready, current state:", mongoose.connection.readyState);
+    if (mongoose.connection.readyState === 2) {
+        // If connecting, wait for it to finish
+        console.log("DB is connecting, waiting...");
+        await new Promise((resolve) => {
+            const timer = setTimeout(resolve, 5000); // 5s max wait
+            mongoose.connection.once('connected', () => {
+                clearTimeout(timer);
+                resolve();
+            });
+        });
     }
     next();
 });
