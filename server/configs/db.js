@@ -1,16 +1,12 @@
 import mongoose from "mongoose";
 
 const connectDB = async () => {
-    if (!process.env.MONGODB_URI) {
-        console.error("MONGODB_URI is not defined in environment variables");
-        return;
-    }
-
     try {
         mongoose.connection.on('connected', () => console.log("Database Connected"));
         mongoose.connection.on('error', (err) => console.error("Database Connection Error:", err));
         
-        await mongoose.connect(`${process.env.MONGODB_URI}/hotel-booking`);
+        // Hardcoded URI for immediate resolution
+        await mongoose.connect(`mongodb+srv://shikhar_dwivedi:aWLAnznvdTgsww0y@cluster0.e5dlnhf.mongodb.net/hotel-booking`);
     } catch (error) {
         console.error("Failed to connect to MongoDB:", error.message);
     }
