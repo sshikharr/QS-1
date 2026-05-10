@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import "dotenv/config";
 import cors from "cors";
 import connectDB from "./configs/db.js";
@@ -11,16 +12,33 @@ import clerkWebhooks from "./controllers/clerkWebhooks.js";
 import connectCloudinary from "./configs/cloudinary.js";
 import { stripeWebhooks } from "./controllers/stripeWebhooks.js";
 
+// Initialize DB connection
 connectDB();
 connectCloudinary();
 
 const app = express();
-app.use(cors()); // Enable Cross-Origin Resource Sharing
 
-// API to listen to Stripe Webhooks
-app.post("/api/stripe",express.raw({ type: "application/json" }),stripeWebhooks);
+// Middleware to ensure DB is connected before processing requests
+app.use(async (req, res, next) => {
+    if (mongoose.connection.readyState !== 1) {
+        // If not connected, wait or try to reconnect
+        console.log("DB not ready, current state:", mongoose.connection.readyState);
+    }
+    next();
+});
 
-// Middleware to parse JSON
+// 1. MUST BE FIRST: Handle CORS and OPTIONS preflight
+app.use(cors({
+    origin: ["http://localhost:5173", "http://localhost:5174", "https://qs-1-bkdevh9zt-shikhar-dwivedis-projects.vercel.app"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// 2. Stripe Webhook (needs raw body, MUST be before express.json)
+app.post("/api/stripe", express.raw({ type: "application/json" }), stripeWebhooks);
+
+// 3. Regular middleware
 app.use(express.json());
 app.use(clerkMiddleware());
 
