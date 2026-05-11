@@ -17,16 +17,6 @@ connectCloudinary();
 
 const app = express();
 
-app.use(cors({
-    origin: (origin, callback) => callback(null, true),
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
-}));
-
-app.options('*', cors());
-
-
 app.use(async (req, res, next) => {
     console.log(`>>> [${new Date().toISOString()}] REQUEST START: ${req.method} ${req.url}`);
     try {
@@ -53,6 +43,12 @@ app.get("/api/debug", (req, res) => {
     });
 });
 
+// 1. MUST BE FIRST: Handle CORS and OPTIONS preflight
+app.use(cors({
+    origin: "*",
+    methods: "*",
+    allowedHeaders: "*"
+}));
 
 // 2. Stripe Webhook (needs raw body, MUST be before express.json)
 app.post("/api/stripe", express.raw({ type: "application/json" }), stripeWebhooks);
