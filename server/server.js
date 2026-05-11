@@ -16,7 +16,7 @@ import { stripeWebhooks } from "./controllers/stripeWebhooks.js";
 connectCloudinary();
 
 const app = express();
-
+app.use(cors());
 // DEBUG LOGGING MIDDLEWARE
 app.use((req, res, next) => {
     const requestId = Math.random().toString(36).substring(7);
@@ -26,9 +26,9 @@ app.use((req, res, next) => {
     console.log(`URL: ${req.url}`);
     console.log(`Origin: ${req.headers.origin || 'NONE'}`);
     console.log(`DB State: ${mongoose.connection.readyState}`);
-    
+
     const originalSend = res.send;
-    res.send = function(body) {
+    res.send = function (body) {
         console.log(`[CORS DEBUG END | ID: ${requestId}] Status: ${res.statusCode}`);
         console.log(`[CORS DEBUG END | ID: ${requestId}] Access-Control-Allow-Origin: ${res.get('Access-Control-Allow-Origin')}`);
         console.log(`--- [CORS DEBUG END | ID: ${requestId}] ---\n`);
@@ -41,48 +41,6 @@ app.use((req, res, next) => {
 
     next();
 });
-
-// 1. MUST BE FIRST: Handle CORS and OPTIONS preflight
-app.use(cors({
-    origin: (origin, callback) => {
-        console.log(`[CORS LOG] Checking origin: ${origin}`);
-        // Allow all origins
-        callback(null, true);
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
-}));
-
-app.options('*', cors());
-
-
-app.use(async (req, res, next) => {
-    console.log(`>>> [${new Date().toISOString()}] REQUEST START: ${req.method} ${req.url}`);
-    try {
-        await connectDB();
-        console.log(`>>> [${new Date().toISOString()}] DB READY, PROCEEDING...`);
-        next();
-    } catch (error) {
-        console.error(`>>> [${new Date().toISOString()}] DB FAILURE:`, error.message);
-        res.status(500).json({
-            success: false,
-            message: "Database connection failed.",
-            error: error.message
-        });
-    }
-});
-
-app.get("/api/debug", (req, res) => {
-    res.json({
-        success: true,
-        message: "Debug route is working",
-        dbState: mongoose.connection.readyState,
-        nodeVersion: process.version,
-        env: process.env.NODE_ENV
-    });
-});
-
 
 // 2. Stripe Webhook (needs raw body, MUST be before express.json)
 app.post("/api/stripe", express.raw({ type: "application/json" }), stripeWebhooks);
