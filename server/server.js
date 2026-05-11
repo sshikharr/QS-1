@@ -25,10 +25,10 @@ app.use(async (req, res, next) => {
         next();
     } catch (error) {
         console.error(`>>> [${new Date().toISOString()}] DB FAILURE:`, error.message);
-        res.status(500).json({ 
-            success: false, 
+        res.status(500).json({
+            success: false,
             message: "Database connection failed.",
-            error: error.message 
+            error: error.message
         });
     }
 });
@@ -45,7 +45,7 @@ app.get("/api/debug", (req, res) => {
 
 // 1. MUST BE FIRST: Handle CORS and OPTIONS preflight
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "https://qs-1-bkdevh9zt-shikhar-dwivedis-projects.vercel.app"],
+    origin: ["http://localhost:5173", "http://localhost:5174", "https://qs-1-bkdevh9zt-shikhar-dwivedis-projects.vercel.app", "https://qs-1-r1mk.vercel.app"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
