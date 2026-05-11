@@ -45,7 +45,7 @@ app.get("/api/debug", (req, res) => {
 
 // 1. MUST BE FIRST: Handle CORS and OPTIONS preflight
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "https://qs-1-bkdevh9zt-shikhar-dwivedis-projects.vercel.app", "https://qs-1-r1mk.vercel.app"],
+    origin: true,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
